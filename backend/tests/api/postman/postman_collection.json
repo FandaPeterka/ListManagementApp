@@ -1,0 +1,521 @@
+{
+  "info": {
+    "name": "List Management Application",
+    "_postman_id": "12345678-abcd-efgh-ijkl-1234567890ab",
+    "description": "Comprehensive API endpoints for testing",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "User Routes",
+      "item": [
+        {
+          "name": "Signup User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"username\": \"user123\",\n  \"password\": \"password\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/signup",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "signup"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Login User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"password\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/login",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "login"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Current User Info",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "me"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update User Profile",
+          "request": {
+            "method": "PUT",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "bio",
+                  "value": "Updated bio",
+                  "type": "text"
+                },
+                {
+                  "key": "status",
+                  "value": "busy",
+                  "type": "text"
+                },
+                {
+                  "key": "newUsername",
+                  "value": "newusername",
+                  "type": "text"
+                },
+                {
+                  "key": "profilePicture",
+                  "type": "file",
+                  "src": ""
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/me",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "me"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"currentPassword\": \"password\",\n  \"newPassword\": \"newpassword\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/users/change-password",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "change-password"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Logout User",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/users/logout",
+              "host": ["{{baseUrl}}"],
+              "path": ["users", "logout"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Token Routes",
+      "item": [
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/tokens/refresh-token",
+              "host": ["{{baseUrl}}"],
+              "path": ["tokens", "refresh-token"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "List Routes",
+      "item": [
+        {
+          "name": "Create List",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"My List\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lists",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Lists",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lists",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists"],
+              "query": [
+                {
+                  "key": "type",
+                  "value": "all"
+                },
+                {
+                  "key": "page",
+                  "value": "1"
+                },
+                {
+                  "key": "limit",
+                  "value": "10"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get List By ID",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lists/{{listId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists", "{{listId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Update List Name",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"title\": \"Updated List Title\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lists/{{listId}}/updateName",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists", "{{listId}}", "updateName"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete List",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lists/{{listId}}/delete",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists", "{{listId}}", "delete"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Restore Deleted List",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lists/{{listId}}/restoreDeleted",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists", "{{listId}}", "restoreDeleted"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Archive List",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lists/{{listId}}/archive",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists", "{{listId}}", "archive"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Restore Archived List",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lists/{{listId}}/restore",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists", "{{listId}}", "restore"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Members",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lists/{{listId}}/members",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists", "{{listId}}", "members"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Add Member",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"newmember\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lists/{{listId}}/members",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists", "{{listId}}", "members"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Member",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lists/{{listId}}/members/{{memberId}}/remove",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists", "{{listId}}", "members", "{{memberId}}", "remove"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Remove Self",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lists/{{listId}}/members/removeSelf",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists", "{{listId}}", "members", "removeSelf"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Permanently Delete List",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lists/{{listId}}/permanent",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists", "{{listId}}", "permanent"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Active Lists Item Counts",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"listIds\": [\"{{listId}}\"]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lists/activeLists/items-counts",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists", "activeLists", "items-counts"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Permanently Delete All Deleted Lists",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lists/deleted/all",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists", "deleted", "all"]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Item Routes",
+      "item": [
+        {
+          "name": "Add Item to List",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"itemText\": \"New Item\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lists/{{listId}}/items",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists", "{{listId}}", "items"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Get Items from List",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lists/{{listId}}/items",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists", "{{listId}}", "items"],
+              "query": [
+                {
+                  "key": "status",
+                  "value": ""
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Mark Item Resolved",
+          "request": {
+            "method": "PATCH",
+            "header": [],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"isResolved\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/lists/{{listId}}/items/{{itemId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists", "{{listId}}", "items", "{{itemId}}"]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete Item from List",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/lists/{{listId}}/items/{{itemId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["lists", "{{listId}}", "items", "{{itemId}}"]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "exec": ["// Set the base URL", "pm.environment.set('baseUrl', 'http://localhost:4000/api');"],
+        "type": "text/javascript"
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:4000/api"
+    },
+    {
+      "key": "listId",
+      "value": ""
+    },
+    {
+      "key": "itemId",
+      "value": ""
+    },
+    {
+      "key": "memberId",
+      "value": ""
+    }
+  ]
+}
