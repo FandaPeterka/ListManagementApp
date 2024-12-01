@@ -31,12 +31,12 @@ Welcome to the **Express.js & MongoDB Backend** for the **List Management Applic
 
 ### Installation & Start
 
-#### Install Dependencies
+#### 1. Install Dependencies
 ```bash
 npm install
 ```
 
-#### Configure Environment Variables env
+#### 2. Configure Environment Variables env
 - You have to use your mongo_uri and connect it to your own database otherwise it won't work!
 
 ```bash
@@ -47,13 +47,12 @@ REFRESH_TOKEN_SECRET=your_refresh_token_secret
 NODE_ENV=development
 ``` 
 
-#### Start the Server
+#### 3. Start the Server
 ```bash
 npm run dev
 ```
 
-#### Use frontend or use Postman / Insomnia files from [tests/api](./tests/api)
-
+#### 4. Use frontend or use Postman / Insomnia files from [tests/api](./tests/api)
 
 ---
 
