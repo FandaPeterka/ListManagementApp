@@ -13,15 +13,31 @@ const logger = require('../../middleware/logger');
  */
 const createList = async (ownerId, title) => {
   logger.info(`Creating new list titled: "${title}" for user ID: ${ownerId}`);
+
   const list = new List({
     ownerId,
     title,
     members: [ownerId],
   });
+
   await list.save();
   logger.info(`List created with ID: ${list._id}`);
   
-  return await list.populate('ownerId members items');
+  await list.populate([
+    {
+      path: 'ownerId',
+      select: '_id', 
+    },
+    {
+      path: 'members',
+      select: '_id username email status', 
+    },
+    {
+      path: 'items',
+    },
+  ]);
+
+  return list;
 };
 
 /**
@@ -34,7 +50,19 @@ const createList = async (ownerId, title) => {
  */
 const getLists = async (userId, type = 'all', page = 1, limit = 10) => {
   let filter = { members: userId };
-  let populateOptions = { path: 'ownerId members items' };
+  let populateOptions = [
+    {
+      path: 'ownerId',
+      select: '_id', 
+    },
+    {
+      path: 'members',
+      select: '_id username email status', 
+    },
+    {
+      path: 'items',
+    },
+  ];
 
   switch (type) {
     case 'active':
@@ -55,7 +83,7 @@ const getLists = async (userId, type = 'all', page = 1, limit = 10) => {
       filter.deletedAt = null;
       filter.$or = [
         { ownerId: userId },
-        { isArchived: false }
+        { isArchived: false },
       ];
       break;
   }
@@ -67,7 +95,7 @@ const getLists = async (userId, type = 'all', page = 1, limit = 10) => {
       .skip((page - 1) * limit)
       .limit(limit)
       .populate(populateOptions),
-    List.countDocuments(filter)
+    List.countDocuments(filter),
   ]);
 
   logger.info(`Found ${lists.length} lists out of ${total} total.`);
@@ -83,8 +111,20 @@ const getLists = async (userId, type = 'all', page = 1, limit = 10) => {
 const getListById = async (listId, userId) => {
   logger.info(`Fetching list with ID: ${listId} for user ID: ${userId}`);
   const list = await List.findOne({ _id: listId, members: userId, deletedAt: null })
-    .populate('ownerId members items');
-  
+    .populate([
+      {
+        path: 'ownerId',
+        select: '_id', 
+      },
+      {
+        path: 'members',
+        select: '_id username email status', 
+      },
+      {
+        path: 'items',
+      },
+    ]);
+
   if (!list) {
     logger.warn(`List with ID: ${listId} not found or access denied.`);
     throw new AppError('List not found or access denied.', 404);
@@ -106,7 +146,16 @@ const updateListName = async (listId, title) => {
     listId,
     { title },
     { new: true, runValidators: true }
-  ).populate('ownerId members items');
+  )
+    .populate([
+      {
+        path: 'ownerId',
+        select: '_id', 
+      },
+      {
+        path: 'items',
+      },
+    ]);
 
   if (!list) {
     logger.warn(`List with ID: ${listId} not found.`);
@@ -128,7 +177,7 @@ const deleteList = async (listId) => {
     listId,
     { deletedAt: new Date() },
     { new: true }
-  );
+  )
 
   if (!list) {
     logger.warn(`List with ID: ${listId} not found for deletion.`);
@@ -150,7 +199,13 @@ const restoreDeletedList = async (listId) => {
     listId,
     { deletedAt: null },
     { new: true }
-  ).populate('ownerId members items');
+  )
+    .populate([
+      {
+        path: 'ownerId',
+        select: '_id',
+      },
+    ]);
 
   if (!list) {
     logger.warn(`List with ID: ${listId} not found for restoration.`);
@@ -172,7 +227,13 @@ const archiveList = async (listId) => {
     listId,
     { isArchived: true },
     { new: true }
-  ).populate('ownerId members items');
+  )
+    .populate([
+      {
+        path: 'ownerId',
+        select: '_id',
+      },
+    ]);
 
   if (!list) {
     logger.warn(`List with ID: ${listId} not found for archiving.`);
@@ -194,7 +255,13 @@ const restoreArchivedList = async (listId) => {
     listId,
     { isArchived: false },
     { new: true }
-  ).populate('ownerId members items');
+  )
+    .populate([
+      {
+        path: 'ownerId',
+        select: '_id', 
+      },
+    ]);
 
   if (!list) {
     logger.warn(`List with ID: ${listId} not found for restoring archive.`);
@@ -212,7 +279,11 @@ const restoreArchivedList = async (listId) => {
  */
 const getMembers = async (listId) => {
   logger.info(`Fetching members of list with ID: ${listId}`);
-  const list = await List.findById(listId).populate('members', 'username email');
+  const list = await List.findById(listId)
+    .populate({
+      path: 'members',
+      select: '_id username email profilePicture bio status',
+    });
 
   if (!list) {
     logger.warn(`List with ID: ${listId} not found.`);
@@ -231,7 +302,8 @@ const getMembers = async (listId) => {
  */
 const addMember = async (listId, username) => {
   logger.info(`Adding member with username: ${username} to list ID: ${listId}`);
-  const user = await User.findOne({ username });
+  const user = await User.findOne({ username })
+    .select('_id username email profilePicture bio status'); // Select only necessary fields
 
   if (!user) {
     logger.warn(`User with username: ${username} not found.`);
@@ -254,7 +326,21 @@ const addMember = async (listId, username) => {
   await list.save();
 
   logger.info(`User ID: ${user._id} successfully added to list ID: ${listId}.`);
-  return await list.populate('ownerId members items');
+  await list.populate([
+    {
+      path: 'ownerId',
+      select: '_id',
+    },
+    {
+      path: 'members',
+      select: '_id username email status',
+    },
+    {
+      path: 'items',
+    },
+  ]);
+
+  return list;
 };
 
 /**
@@ -281,7 +367,21 @@ const removeMember = async (listId, memberId) => {
   await list.save();
 
   logger.info(`User ID: ${memberId} successfully removed from list ID: ${listId}.`);
-  return await list.populate('ownerId members items');
+  await list.populate([
+    {
+      path: 'ownerId',
+      select: '_id',
+    },
+    {
+      path: 'members',
+      select: '_id username email status',
+    },
+    {
+      path: 'items',
+    },
+  ]);
+
+  return list;
 };
 
 /**
@@ -299,12 +399,10 @@ const removeSelf = async (listId, userId) => {
     throw new AppError('List not found.', 404);
   }
 
-  
   if (list.ownerId.toString() === userId.toString()) {
-    throw new AppError('Owner can not be removed.', 400);
+    throw new AppError('Owner cannot be removed from the list.', 400);
   }
 
-  
   return await removeMember(listId, userId);
 };
 
