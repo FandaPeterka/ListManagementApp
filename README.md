@@ -45,9 +45,3 @@ Welcome to the **List Management Application**! This project was created as a ho
 
 2. **Explore the Frontend Folder**  
    Navigate to the [`/frontend`](./frontend) folder for installation instructions and to start the client-side application.
-
-## 📩 Contribution and Support
-
-We welcome any feedback, issue reports, or contributions to the project.
-
-Enjoy using the **List Management Application** and discover all its features!
