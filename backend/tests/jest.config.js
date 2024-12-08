@@ -4,14 +4,14 @@ module.exports = {
   testEnvironment: 'node',
   verbose: true,
   maxWorkers: 1,
-  setupFilesAfterEnv: ['./jest.setup.js'], // Relativní cesta k setup souboru uvnitř tests
+  setupFilesAfterEnv: ['./jest.setup.js'],
   collectCoverage: true,
-  coverageDirectory: 'coverage', // Coverage složka uvnitř tests
+  coverageDirectory: 'coverage',
   collectCoverageFrom: [
-    '../**/*.{js,jsx}', // Cesty relativní k jest.config.js ve složce tests
+    '../**/*.{js,jsx}',
     '!../node_modules/**',
     '!../coverage/**',
-    '!../tests/**', // Vyloučení všech souborů ve složce tests z coverage
+    '!../tests/**',
     '!../jest.config.js',
     '!../server.js',
     '!../config/**',
@@ -19,5 +19,4 @@ module.exports = {
   coverageReporters: ['text', 'lcov'],
   moduleFileExtensions: ['js', 'json', 'jsx', 'node'],
   moduleDirectories: ['node_modules', 'features', 'middleware', 'utils', 'config'],
-  testTimeout: 10000, // Nastavení globálního timeoutu na 10 sekund
 };

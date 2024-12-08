@@ -1,9 +1,9 @@
+// features/lists/listService.js
 const List = require('./listModel');
 const User = require('../users/userModel');
 const Item = require('../items/itemModel');
 const { AppError } = require('../../middleware/errorHandler');
 const mongoose = require('mongoose');
-const logger = require('../../middleware/logger');
 
 /**
  * Creates a new list.
@@ -12,7 +12,10 @@ const logger = require('../../middleware/logger');
  * @returns {Promise<Object>} - Created list.
  */
 const createList = async (ownerId, title) => {
-  logger.info(`Creating new list titled: "${title}" for user ID: ${ownerId}`);
+  const owner = await User.findById(ownerId);
+  if (!owner) {
+    throw new AppError('Owner does not exist.', 404);
+  }
 
   const list = new List({
     ownerId,
@@ -21,16 +24,15 @@ const createList = async (ownerId, title) => {
   });
 
   await list.save();
-  logger.info(`List created with ID: ${list._id}`);
-  
+
   await list.populate([
     {
       path: 'ownerId',
-      select: '_id', 
+      select: '_id',
     },
     {
       path: 'members',
-      select: '_id username email status', 
+      select: '_id username email status',
     },
     {
       path: 'items',
@@ -88,8 +90,6 @@ const getLists = async (userId, type = 'all', page = 1, limit = 10) => {
       break;
   }
 
-  logger.info(`Fetching lists for user ID: ${userId} with filter: ${type}, page: ${page}, limit: ${limit}`);
-
   const [lists, total] = await Promise.all([
     List.find(filter)
       .skip((page - 1) * limit)
@@ -98,7 +98,6 @@ const getLists = async (userId, type = 'all', page = 1, limit = 10) => {
     List.countDocuments(filter),
   ]);
 
-  logger.info(`Found ${lists.length} lists out of ${total} total.`);
   return { lists, total };
 };
 
@@ -109,7 +108,6 @@ const getLists = async (userId, type = 'all', page = 1, limit = 10) => {
  * @returns {Promise<Object>} - List data.
  */
 const getListById = async (listId, userId) => {
-  logger.info(`Fetching list with ID: ${listId} for user ID: ${userId}`);
   const list = await List.findOne({ _id: listId, members: userId, deletedAt: null })
     .populate([
       {
@@ -126,11 +124,9 @@ const getListById = async (listId, userId) => {
     ]);
 
   if (!list) {
-    logger.warn(`List with ID: ${listId} not found or access denied.`);
     throw new AppError('List not found or access denied.', 404);
   }
 
-  logger.info(`List with ID: ${listId} successfully fetched.`);
   return list;
 };
 
@@ -141,7 +137,6 @@ const getListById = async (listId, userId) => {
  * @returns {Promise<Object>} - Updated list.
  */
 const updateListName = async (listId, title) => {
-  logger.info(`Updating list ID: ${listId} with new title: "${title}"`);
   const list = await List.findByIdAndUpdate(
     listId,
     { title },
@@ -158,11 +153,9 @@ const updateListName = async (listId, title) => {
     ]);
 
   if (!list) {
-    logger.warn(`List with ID: ${listId} not found.`);
     throw new AppError('List not found.', 404);
   }
 
-  logger.info(`List ID: ${listId} successfully updated.`);
   return list;
 };
 
@@ -172,19 +165,16 @@ const updateListName = async (listId, title) => {
  * @returns {Promise<Object>} - Updated list.
  */
 const deleteList = async (listId) => {
-  logger.info(`Soft deleting list with ID: ${listId}`);
   const list = await List.findByIdAndUpdate(
     listId,
     { deletedAt: new Date() },
     { new: true }
-  )
+  );
 
   if (!list) {
-    logger.warn(`List with ID: ${listId} not found for deletion.`);
     throw new AppError('List not found.', 404);
   }
 
-  logger.info(`List ID: ${listId} marked as deleted.`);
   return list;
 };
 
@@ -194,7 +184,6 @@ const deleteList = async (listId) => {
  * @returns {Promise<Object>} - Restored list.
  */
 const restoreDeletedList = async (listId) => {
-  logger.info(`Restoring deleted list with ID: ${listId}`);
   const list = await List.findByIdAndUpdate(
     listId,
     { deletedAt: null },
@@ -208,11 +197,9 @@ const restoreDeletedList = async (listId) => {
     ]);
 
   if (!list) {
-    logger.warn(`List with ID: ${listId} not found for restoration.`);
     throw new AppError('List not found.', 404);
   }
 
-  logger.info(`List ID: ${listId} successfully restored.`);
   return list;
 };
 
@@ -222,7 +209,6 @@ const restoreDeletedList = async (listId) => {
  * @returns {Promise<Object>} - Archived list.
  */
 const archiveList = async (listId) => {
-  logger.info(`Archiving list with ID: ${listId}`);
   const list = await List.findByIdAndUpdate(
     listId,
     { isArchived: true },
@@ -236,11 +222,9 @@ const archiveList = async (listId) => {
     ]);
 
   if (!list) {
-    logger.warn(`List with ID: ${listId} not found for archiving.`);
     throw new AppError('List not found.', 404);
   }
 
-  logger.info(`List ID: ${listId} successfully archived.`);
   return list;
 };
 
@@ -250,7 +234,6 @@ const archiveList = async (listId) => {
  * @returns {Promise<Object>} - Restored list.
  */
 const restoreArchivedList = async (listId) => {
-  logger.info(`Restoring archived list with ID: ${listId}`);
   const list = await List.findByIdAndUpdate(
     listId,
     { isArchived: false },
@@ -264,11 +247,9 @@ const restoreArchivedList = async (listId) => {
     ]);
 
   if (!list) {
-    logger.warn(`List with ID: ${listId} not found for restoring archive.`);
     throw new AppError('List not found.', 404);
   }
 
-  logger.info(`List ID: ${listId} successfully restored from archive.`);
   return list;
 };
 
@@ -278,7 +259,6 @@ const restoreArchivedList = async (listId) => {
  * @returns {Promise<Array>} - Array of members.
  */
 const getMembers = async (listId) => {
-  logger.info(`Fetching members of list with ID: ${listId}`);
   const list = await List.findById(listId)
     .populate({
       path: 'members',
@@ -286,11 +266,9 @@ const getMembers = async (listId) => {
     });
 
   if (!list) {
-    logger.warn(`List with ID: ${listId} not found.`);
     throw new AppError('List not found.', 404);
   }
 
-  logger.info(`Members of list ID: ${listId} successfully fetched.`);
   return list.members;
 };
 
@@ -301,31 +279,26 @@ const getMembers = async (listId) => {
  * @returns {Promise<Object>} - Updated list.
  */
 const addMember = async (listId, username) => {
-  logger.info(`Adding member with username: ${username} to list ID: ${listId}`);
   const user = await User.findOne({ username })
     .select('_id username email profilePicture bio status'); // Select only necessary fields
 
   if (!user) {
-    logger.warn(`User with username: ${username} not found.`);
     throw new AppError('User not found.', 404);
   }
 
   const list = await List.findById(listId);
 
   if (!list) {
-    logger.warn(`List with ID: ${listId} not found.`);
     throw new AppError('List not found.', 404);
   }
 
   if (list.members.includes(user._id)) {
-    logger.warn(`User ID: ${user._id} is already a member of list ID: ${listId}.`);
     throw new AppError('User is already a member of the list.', 400);
   }
 
   list.members.push(user._id);
   await list.save();
 
-  logger.info(`User ID: ${user._id} successfully added to list ID: ${listId}.`);
   await list.populate([
     {
       path: 'ownerId',
@@ -350,23 +323,19 @@ const addMember = async (listId, username) => {
  * @returns {Promise<Object>} - Updated list.
  */
 const removeMember = async (listId, memberId) => {
-  logger.info(`Removing member with ID: ${memberId} from list ID: ${listId}`);
   const list = await List.findById(listId);
 
   if (!list) {
-    logger.warn(`List with ID: ${listId} not found.`);
     throw new AppError('List not found.', 404);
   }
 
   if (!list.members.includes(memberId)) {
-    logger.warn(`User ID: ${memberId} is not a member of list ID: ${listId}.`);
     throw new AppError('User is not a member of the list.', 400);
   }
 
   list.members.pull(memberId);
   await list.save();
 
-  logger.info(`User ID: ${memberId} successfully removed from list ID: ${listId}.`);
   await list.populate([
     {
       path: 'ownerId',
@@ -391,8 +360,6 @@ const removeMember = async (listId, memberId) => {
  * @returns {Promise<Object>} - Updated list.
  */
 const removeSelf = async (listId, userId) => {
-  logger.info(`User ID ${userId} is attempting to remove themselves from list ID: ${listId}`);
-
   const list = await List.findById(listId);
 
   if (!list) {
@@ -412,18 +379,15 @@ const removeSelf = async (listId, userId) => {
  * @returns {Promise<Object>} - Deleted list.
  */
 const permanentlyDeleteList = async (listId) => {
-  logger.info(`Permanently deleting list with ID: ${listId}`);
   const list = await List.findByIdAndDelete(listId);
 
   if (!list) {
-    logger.warn(`List with ID: ${listId} not found for permanent deletion.`);
     throw new AppError('List not found.', 404);
   }
 
   // Delete associated items
   await Item.deleteMany({ listId: list._id });
 
-  logger.info(`List ID: ${listId} and its items have been permanently deleted.`);
   return list;
 };
 
@@ -434,17 +398,13 @@ const permanentlyDeleteList = async (listId) => {
  * @returns {Promise<Array>} - Array of objects containing list ID, title, and item count.
  */
 const getActiveListsItemCounts = async (userId, listIds) => {
-  logger.info(`Retrieving item counts for active lists of user ID: ${userId}`);
-  
   if (!Array.isArray(listIds) || listIds.length === 0) {
-    logger.warn('Invalid listIds provided.');
     throw new AppError('Invalid listIds.', 400);
   }
 
   // Verify all listIds are valid ObjectIds
   const validObjectIds = listIds.every(id => mongoose.Types.ObjectId.isValid(id));
   if (!validObjectIds) {
-    logger.warn('One or more listIds are invalid.');
     throw new AppError('One or more listIds are invalid.', 400);
   }
 
@@ -464,10 +424,8 @@ const getActiveListsItemCounts = async (userId, listIds) => {
       itemCount: list.items.length,
     }));
 
-    logger.info(`Item counts for active lists of user ID: ${userId} successfully retrieved.`);
     return counts;
   } catch (error) {
-    logger.error(`Error retrieving item counts: ${error.message}`);
     throw new AppError('Failed to retrieve item counts.', 500);
   }
 };
@@ -478,19 +436,16 @@ const getActiveListsItemCounts = async (userId, listIds) => {
  * @returns {Promise<Object>} - Information about deleted lists.
  */
 const permanentlyDeleteAllDeletedLists = async (userId) => {
-  logger.info(`Permanently deleting all deleted lists for user ID: ${userId}`);
   const lists = await List.find({ ownerId: userId, deletedAt: { $ne: null } });
   const listIds = lists.map((list) => list._id);
 
   if (listIds.length === 0) {
-    logger.info(`No deleted lists found for user ID: ${userId}.`);
     return { deletedCount: 0 };
   }
 
   await List.deleteMany({ _id: { $in: listIds } });
   await Item.deleteMany({ listId: { $in: listIds } });
 
-  logger.info(`Permanently deleted ${listIds.length} lists and their associated items for user ID: ${userId}.`);
   return { deletedCount: listIds.length };
 };
 

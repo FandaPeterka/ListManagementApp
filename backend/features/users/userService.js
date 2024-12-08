@@ -1,10 +1,7 @@
+// features/users/userService.js
 const User = require('./userModel');
 const bcrypt = require('bcryptjs');
 const { AppError } = require('../../middleware/errorHandler');
-const logger = require('../../middleware/logger');
-const jwt = require('jsonwebtoken');
-const { v4: uuidv4 } = require('uuid');
-const RefreshToken = require('../tokens/refreshTokenModel');
 
 /**
  * Registers a new user.
@@ -14,20 +11,19 @@ const RefreshToken = require('../tokens/refreshTokenModel');
  * @returns {Promise<Object>} - Created user.
  */
 const registerUser = async (email, username, password) => {
-  logger.info(`Checking if user exists with email: ${email} or username: ${username}`);
   const existingUser = await User.findOne({ $or: [{ email }, { username }] });
   if (existingUser) {
     throw new AppError('Email or username already in use.', 400);
   }
 
-  logger.info('Hashing password.');
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  logger.info('Creating new user.');
   const user = await User.create({ email, username, password: hashedPassword });
 
-  logger.info(`User registered with ID: ${user._id}`);
-  return user;
+  const userObj = user.toObject();
+  delete userObj.password;
+
+  return userObj;
 };
 
 /**
@@ -37,20 +33,21 @@ const registerUser = async (email, username, password) => {
  * @returns {Promise<Object>} - Logged in user.
  */
 const loginUser = async (email, password) => {
-  logger.info(`Searching for user with email: ${email}`);
   const user = await User.findOne({ email }).select('+password');
   if (!user) {
     throw new AppError('Invalid email or password.', 401);
   }
 
-  logger.info('Checking password.');
   const isMatch = await bcrypt.compare(password, user.password);
   if (!isMatch) {
     throw new AppError('Invalid email or password.', 401);
   }
 
-  logger.info(`User logged in with ID: ${user._id}`);
-  return user;
+  // Odstranění pole password před vrácením uživatele
+  const userObj = user.toObject();
+  delete userObj.password;
+
+  return userObj;
 };
 
 /**
@@ -60,7 +57,6 @@ const loginUser = async (email, password) => {
  * @returns {Promise<Object>} - Updated user.
  */
 const updateUserProfile = async (userId, updateData) => {
-  logger.info(`Updating profile for user ID: ${userId}`);
   const user = await User.findByIdAndUpdate(userId, updateData, {
     new: true,
     runValidators: true,
@@ -70,7 +66,6 @@ const updateUserProfile = async (userId, updateData) => {
     throw new AppError('User not found.', 404);
   }
 
-  logger.info(`User profile updated for ID: ${user._id}`);
   return user;
 };
 
@@ -80,7 +75,6 @@ const updateUserProfile = async (userId, updateData) => {
  * @returns {Promise<Object>} - User.
  */
 const getUserById = async (userId) => {
-  logger.info(`Retrieving user with ID: ${userId}`);
   const user = await User.findById(userId);
   if (!user) {
     throw new AppError('User not found.', 404);
@@ -96,7 +90,6 @@ const getUserById = async (userId) => {
  * @returns {Promise<Object>} - Updated user.
  */
 const changePassword = async (userId, currentPassword, newPassword) => {
-  logger.info(`Changing password for user ID: ${userId}`);
   const user = await User.findById(userId).select('+password');
   if (!user) {
     throw new AppError('User not found.', 404);
@@ -111,7 +104,6 @@ const changePassword = async (userId, currentPassword, newPassword) => {
   user.password = hashedPassword;
   await user.save();
 
-  logger.info(`Password changed for user ID: ${userId}`);
   return user;
 };
 

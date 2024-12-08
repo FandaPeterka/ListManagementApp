@@ -1,7 +1,7 @@
 const Joi = require('joi');
 
 const createListSchema = Joi.object({
-  title: Joi.string().trim().min(1).max(50).required().messages({
+  title: Joi.string().trim().min(1).max(255).required().messages({
     'string.empty': 'List title must not be empty.',
     'string.min': 'List title must contain at least 1 character.',
     'string.max': 'List title must not exceed 255 characters.',
@@ -10,7 +10,7 @@ const createListSchema = Joi.object({
 });
 
 const updateListSchema = Joi.object({
-  title: Joi.string().trim().min(1).max(50).optional().messages({
+  title: Joi.string().trim().min(1).max(255).optional().messages({
     'string.empty': 'List title must not be empty.',
     'string.min': 'List title must contain at least 1 character.',
     'string.max': 'List title must not exceed 255 characters.',
@@ -31,12 +31,21 @@ const getListsSchema = Joi.object({
 });
 
 const getActiveListsItemCountsSchema = Joi.object({
-  listIds: Joi.array().items(Joi.string().hex().length(24)).min(1).required().messages({
-    'array.base': 'listIds must be an array.',
-    'array.includes': 'All IDs in listIds must be valid ObjectId.',
-    'array.min': 'The listIds array must contain at least one ID.',
-    'any.required': 'The listIds field is required.',
-  }),
+  listIds: Joi.array()
+    .items(
+      Joi.string().hex().length(24).messages({
+        'string.base': 'All IDs in listIds must be valid ObjectId.',
+        'string.hex': 'All IDs in listIds must be valid ObjectId.',
+        'string.length': 'All IDs in listIds must be valid ObjectId.',
+      })
+    )
+    .min(1)
+    .required()
+    .messages({
+      'array.base': 'listIds must be an array.',
+      'array.min': 'The listIds array must contain at least one ID.',
+      'any.required': 'The listIds field is required.',
+    }),
 });
 
 module.exports = {
